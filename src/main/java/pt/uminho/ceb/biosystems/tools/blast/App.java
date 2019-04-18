@@ -260,13 +260,30 @@ public class App
 				for(Thread thread :threads)
 					thread.join();
 
+				
+				boolean replaceLast = true;
+				boolean replaceFirst = true;
+				
+				if(count == totalBlasts)
+					replaceLast = false;
+				
+				if(count == 1)
+					replaceFirst = false;
 
-				ExportResults.exportToJSON(alignmentContainerSet, resultsFileName);
+				ExportResults.exportToJSON(alignmentContainerSet, resultsFileName, replaceFirst, replaceLast);
 				
 				count++;
 			}
+			
+			System.out.println("Blast finnished!");
 
-			fixJsonFile(resultsFileName);
+//			try {
+//				fixJsonFile(resultsFileName);
+//			} 
+//			catch (Exception e) {
+//				System.out.println("JSON fix failed! Results are stored but JSON is not valid! To fix it, replace all '}{' occurrences by ','!");
+//				e.printStackTrace();
+//			}
 
 			return true;
 
@@ -388,11 +405,53 @@ public class App
         fr.close();
         br.close();
 
-        FileWriter fw = new FileWriter(file);
+        FileWriter fw = new FileWriter(new File(path.replace(".json", "2.json")));
         BufferedWriter out = new BufferedWriter(fw);
         out.write(line);
         out.flush();
         out.close();
+        
+        System.out.println("JSON file fixed!");
+	}
+	
+	/**
+	 * @param path
+	 * @throws IOException
+	 */
+	public static void fixJsonFile2(String path) throws IOException {
+		
+		PrintWriter writer = new PrintWriter(new File(path.replace(".txt", "2.txt")));
+		
+		File file = new File(path); 
+		  
+        FileReader fr = new FileReader(file);
+        BufferedReader br = new BufferedReader(fr);
+        
+        String newLine = "";
+        String st = null;
+        boolean replace = false;
+        
+        while ((st = br.readLine()) != null) {
+        	
+        	if(replace)
+        		newLine = st.replaceAll("^\\{", "");
+        	else
+        		newLine = st;
+        	
+        	if(st.matches(".*}@$")) {
+        		newLine = newLine.replaceAll("}@$", ",");
+        		replace = true;
+        	}
+        	else
+        		replace = false;
+        	
+        	writer.println(newLine);
+        } 
+        
+        fr.close();
+        br.close();
+
+        writer.close();
         
         System.out.println("JSON file fixed!");
 	}

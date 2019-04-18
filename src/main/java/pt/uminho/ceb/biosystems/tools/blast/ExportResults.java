@@ -14,7 +14,7 @@ public class ExportResults {
 	 * @param failed
 	 */
 	@SuppressWarnings("unchecked")
-	public static void exportToJSON(ConcurrentLinkedQueue<AlignmentCapsule> capsules, String resultsName) {
+	public static void exportToJSON(ConcurrentLinkedQueue<AlignmentCapsule> capsules, String resultsName, boolean replaceFirst, boolean replaceLast) {
 		
 		try {
 			
@@ -52,9 +52,16 @@ public class ExportResults {
 				mappingObj.put(query, similarities);
 				
 			}
-
-			file.write(mappingObj.toJSONString());		//fazer um jsonify no final em que faz replace de "}{" por nada
-
+			String line = mappingObj.toJSONString();		//fazer um jsonify no final em que faz replace de "}{" por nada
+			
+			if(replaceFirst)
+				line = line.replaceAll("^\\{", "");
+			
+			if(replaceLast)
+				line = line.replaceAll("\\}$", ",");
+			
+			file.write(line);
+			file.write(System.getProperty( "line.separator" ));
 			file.close();
 
 //			logger.info("JSON object saved successfully to file...");
