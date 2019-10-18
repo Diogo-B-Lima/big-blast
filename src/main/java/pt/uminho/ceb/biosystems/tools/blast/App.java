@@ -36,11 +36,11 @@ public class App
 {
 	private static final int LIMIT = 500;
 	private static final String FINAL_RESULTS = "finalResults.json";
-	private static final String EVALUE = "10";
-	private static final String BIT_SCORE = "0";
-	private static final String QUERY_COVERAGE = "0";
-	private static final String SUBJECT_COVERAGE = "0";
-
+	private static final String EVALUE = "-6";
+	private static final String BIT_SCORE = "50";
+	private static final String QUERY_COVERAGE = "0.8";
+	private static final String SUBJECT_COVERAGE = "0.8";
+	// threshold values based on Pearson's study "An introduction to sequence similarity ("Homology") Searching"
 
 	public static void main(String[] args ){
 		
