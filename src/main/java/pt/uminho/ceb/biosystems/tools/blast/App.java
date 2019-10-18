@@ -7,13 +7,14 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 
 import javax.xml.bind.JAXBException;
 
@@ -22,8 +23,10 @@ import org.biojava.nbio.core.sequence.template.AbstractSequence;
 
 import pt.uminho.ceb.biosystems.merlin.bioapis.externalAPI.ncbi.CreateGenomeFile;
 import pt.uminho.ceb.biosystems.merlin.bioapis.externalAPI.utilities.Enumerators.FileExtensions;
-import pt.uminho.ceb.biosystems.merlin.local.alignments.core.ModelMerge.ModelAlignments;
-import pt.uminho.ceb.biosystems.merlin.utilities.containers.capsules.AlignmentCapsule;
+import pt.uminho.ceb.biosystems.merlin.core.containers.alignment.AlignmentContainer;
+import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.AlignmentScoreType;
+import pt.uminho.ceb.biosystems.merlin.core.utilities.Enumerators.Method;
+import pt.uminho.ceb.biosystems.mew.utilities.datastructures.pair.Pair;
 
 /**
  * Hello world!
@@ -33,6 +36,11 @@ public class App
 {
 	private static final int LIMIT = 500;
 	private static final String FINAL_RESULTS = "finalResults.json";
+	private static final String EVALUE = "10";
+	private static final String BIT_SCORE = "0";
+	private static final String QUERY_COVERAGE = "0";
+	private static final String SUBJECT_COVERAGE = "0";
+
 
 	public static void main(String[] args ){
 		
@@ -42,6 +50,10 @@ public class App
 		String subject = "";
 		String blastProgram = "";
 		String evalue = "";
+		String bitScore = "";
+		String queryCoverage = "";
+		String subjectCoverage = "";
+
 		String workDirectory = "";
 		String resultsFileName = FINAL_RESULTS;
 		int newLimit = LIMIT;
@@ -99,7 +111,7 @@ public class App
 				}
 			}
 			
-			if(args.length > 9) {
+			if(args.length > 12) {
 
 				for(int i = 0; i < args.length; i++) {
 					
@@ -111,11 +123,26 @@ public class App
 
 						else if(args[i].equals("-e")) {
 							i++;
-							evalue = "-evalue ".concat(args[i]);
+							evalue = args[i];
 						}
 						else if(args[i].equals("-r")) {
 							i++;
 							resultsFileName = args[i];
+						}
+						
+						else if(args[i].equals("-bit")) {
+							i++;
+							bitScore = args[i];
+						}
+						
+						else if(args[i].equals("-qcov")) {
+							i++;
+							queryCoverage = args[i];
+						}
+						
+						else if(args[i].equals("-scov")) {
+							i++;
+							subjectCoverage = args[i];
 						}
 					} 
 					catch (NumberFormatException e) {
@@ -125,7 +152,11 @@ public class App
 					catch (Exception e) {
 						newLimit = LIMIT;
 						resultsFileName = FINAL_RESULTS;
-						evalue = "";
+						evalue = EVALUE;
+						bitScore = BIT_SCORE;
+						queryCoverage = QUERY_COVERAGE;
+						subjectCoverage= SUBJECT_COVERAGE;
+
 					}
 				}
 			}
@@ -152,12 +183,15 @@ public class App
 		boolean success = false;
 		
 		try {
-			success = runBlast(blastProgram, query, subject, evalue, newLimit, workDirectory, resultsFileName);
+			success = runBlast(blastProgram, query, subject, evalue, bitScore, queryCoverage, subjectCoverage, newLimit, workDirectory, resultsFileName);
 		} 
 		catch (InterruptedException e) {
 			System.out.println("An error occurred while running!!");
 			e.printStackTrace();
 			System.exit(3);
+		} catch (Exception e) {
+			System.out.println("An unknown error occurred while running!!");
+			e.printStackTrace();
 		}
 		
 		if(success)
@@ -169,7 +203,7 @@ public class App
 
 	
 
-	private static boolean runBlast(String blastProgram, String query, String subject, String evalue, int sequencesLimit, String workdir, String resultsFileName) throws InterruptedException {
+	public static boolean runBlast(String blastProgram, String query, String subject, String evalue, String bitScore, String queryCoverage, String subjectCoverage, int sequencesLimit, String workdir, String resultsFileName) throws Exception {
 
 //		String subFasta = workdir.concat("/newTemporaryFasta.faa");
 
@@ -185,9 +219,16 @@ public class App
 			ConcurrentHashMap<String, AbstractSequence<?>> querySequences= new ConcurrentHashMap<String, AbstractSequence<?>>();
 			querySequences.putAll(FastaReaderHelper.readFastaProteinSequence(new File(query)));
 			
+			ConcurrentHashMap<String, AbstractSequence<?>> subjectSequences= new ConcurrentHashMap<String, AbstractSequence<?>>();
+			subjectSequences.putAll(FastaReaderHelper.readFastaProteinSequence(new File(subject)));
+			
 			int totalBlasts = querySequences.size() / sequencesLimit;
 			
 			int count = 1;
+			
+			String resultsFile2 = new File(resultsFileName).getName();
+			
+			resultsFile2 = resultsFileName.replace(resultsFile2, "complementary_"+resultsFile2);
 			
 			while(querySequences.size() > 0) {
 				
@@ -216,19 +257,19 @@ public class App
 				}
 				
 				
-				List<Thread> threads = new ArrayList<Thread>();
+//				List<Thread> threads = new ArrayList<Thread>();
 				//			ConcurrentLinkedQueue<String> queryArray = new ConcurrentLinkedQueue<String>(this.querySequences.keySet());
-				int numberOfCores = Runtime.getRuntime().availableProcessors();
+//				int numberOfCores = Runtime.getRuntime().availableProcessors();
 				//int numberOfCores = new Double(Runtime.getRuntime().availableProcessors()*1.5).intValue();
 
-				if(subQuerySequences.keySet().size()<numberOfCores)
-					numberOfCores=subQuerySequences.keySet().size();
+//				if(subQuerySequences.keySet().size()<numberOfCores)
+//					numberOfCores=subQuerySequences.keySet().size();
+//				
+//				String path = workdir.concat("/queryBlast");
 				
-				String path = workdir.concat("/queryBlast");
-				
-				File f = new File (path);
-				if(!f.exists())
-					f.mkdir();
+//				File f = new File (path);
+//				if(!f.exists())
+//					f.mkdir();
 				
 				//			this.querySize.set(new Integer(this.querySequences.size()));
 				//			setChanged();
@@ -239,27 +280,18 @@ public class App
 				//			logger.debug("Writting query sequences temporary fasta files... ");
 				System.out.println("Writting query sequences temporary fasta files... ");
 
-				List<String> queryFilesPaths = new ArrayList<>();
-				List<Map<String,AbstractSequence<?>>> queriesSubSetList = new ArrayList<>();
 
-				CreateGenomeFile.buildSubFastaFiles(workdir, subQuerySequences, queriesSubSetList, queryFilesPaths, numberOfCores);
+//				CreateGenomeFile.buildSubFastaFiles(workdir, subQuerySequences, queriesSubSetList, queryFilesPaths, numberOfCores);
 
-				ConcurrentLinkedQueue<AlignmentCapsule> alignmentContainerSet = new ConcurrentLinkedQueue<>();
+				RunSimilaritySearchBigBlast similaritySearch = new RunSimilaritySearchBigBlast(subjectSequences, 0.0, Method.Blast, subQuerySequences,
+						new AtomicBoolean(false), new AtomicInteger(0), new AtomicInteger(0), AlignmentScoreType.ALIGNMENT);
 
-				for(int i=0; i<numberOfCores; i++) {
-
-					ModelAlignments blastAlign;
-
-					blastAlign= new Blast(blastProgram, queryFilesPaths.get(i), subject, evalue, queriesSubSetList.get(i), 0.0, alignmentContainerSet);
-					
-					Thread thread = new Thread(blastAlign);
-					threads.add(thread);
-					thread.start();
-				}
-
-				for(Thread thread :threads)
-					thread.join();
-
+				similaritySearch.setWorkspaceTaxonomyFolderPath(workdir);
+				
+				Pair<ConcurrentLinkedQueue<AlignmentContainer>,ConcurrentLinkedQueue<AlignmentContainer>> bbHits 
+				= similaritySearch.runBBBlastHits(//queryFastaFile.getAbsolutePath(),subjectFastaFile.getAbsolutePath(),
+						false, Double.valueOf(evalue),  Double.valueOf(bitScore),  Double.valueOf(queryCoverage),  Double.valueOf(subjectCoverage));    // last 4 parameters are evalue, bitscore, query coverage and target coverage thresholds
+				
 				
 				boolean replaceLast = true;
 				boolean replaceFirst = true;
@@ -269,9 +301,11 @@ public class App
 				
 				if(count == 1)
 					replaceFirst = false;
-
-				ExportResults.exportToJSON(alignmentContainerSet, resultsFileName, replaceFirst, replaceLast);
+					
 				
+				ExportResults.exportToJSON(bbHits.getA(), resultsFileName, replaceFirst, replaceLast);
+				ExportResults.exportToJSON(bbHits.getB(), resultsFile2, replaceFirst, replaceLast);
+
 				count++;
 			}
 			

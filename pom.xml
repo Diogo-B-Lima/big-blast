@@ -16,7 +16,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 		<maven.build.timestamp.format>yyyy</maven.build.timestamp.format>
-		<pt.uminho.ceb.biosystems.merlin.version>0.0.4-SNAPSHOT</pt.uminho.ceb.biosystems.merlin.version>
+		<pt.uminho.ceb.biosystems.merlin.version>4.0.1-SNAPSHOT</pt.uminho.ceb.biosystems.merlin.version>
 		<pt.uminho.ceb.biosystems.merlin.groupId>pt.uminho.ceb.biosystems.merlin</pt.uminho.ceb.biosystems.merlin.groupId>
 		<build.name>beta</build.name>
 	</properties>
@@ -25,7 +25,7 @@
 		<repository>
 			<id>nexus</id>
 			<name>Nexus BioSystems Server</name>
-			<url>https://www.bio.di.uminho.pt/nexus/content/groups/public/</url>
+			<url>https://nexus.bio.di.uminho.pt/content/groups/public/</url>
 		</repository>
 	</repositories>
 
@@ -97,7 +97,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${pt.uminho.ceb.biosystems.merlin.groupId}</groupId>
-			<artifactId>local-alignments</artifactId>
+			<artifactId>merlin-alignments</artifactId>
 			<version>${pt.uminho.ceb.biosystems.merlin.version}</version>
 		</dependency>
 

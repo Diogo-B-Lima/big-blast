@@ -5,7 +5,8 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 import org.json.simple.JSONObject;
 
-import pt.uminho.ceb.biosystems.merlin.utilities.containers.capsules.AlignmentCapsule;
+import pt.uminho.ceb.biosystems.merlin.core.containers.alignment.AlignmentContainer;
+
 
 public class ExportResults {
 
@@ -14,7 +15,7 @@ public class ExportResults {
 	 * @param failed
 	 */
 	@SuppressWarnings("unchecked")
-	public static void exportToJSON(ConcurrentLinkedQueue<AlignmentCapsule> capsules, String resultsName, boolean replaceFirst, boolean replaceLast) {
+	public static void exportToJSON(ConcurrentLinkedQueue<AlignmentContainer> containers, String resultsName, boolean replaceFirst, boolean replaceLast) {
 		
 		try {
 			
@@ -25,10 +26,13 @@ public class ExportResults {
 
 			JSONObject mappingObj = new JSONObject();
 			
-			for(AlignmentCapsule capsule : capsules) {
+			for(AlignmentContainer container : containers) {
 				
-				String query = capsule.getQuery();
-				String target = capsule.getTargetLocus();
+				String query = container.getQuery();
+				String target = container.getTarget();
+				
+				if(target == null)
+					target = container.getTargetLocus();
 				
 				if(!mappingObj.containsKey(query))
 					mappingObj.put(query, new JSONObject());
@@ -40,13 +44,13 @@ public class ExportResults {
 				
 				JSONObject alignmentDetails = (JSONObject) similarities.get(target);
 				
-				alignmentDetails.put(BlastParameters.bitScore.toString(), capsule.getBitScore()+"");
-				alignmentDetails.put(BlastParameters.e_value.toString(), capsule.getEvalue()+"");
-				alignmentDetails.put(BlastParameters.align_len.toString(), capsule.getAlignmentLength()+"");
-				alignmentDetails.put(BlastParameters.identity.toString(), capsule.getIdentityScore()+"");
-				alignmentDetails.put(BlastParameters.score.toString(), capsule.getScore()+"");
-				alignmentDetails.put(BlastParameters.query_coverage.toString(), capsule.getCoverageQuery()+"");
-				alignmentDetails.put(BlastParameters.target_coverage.toString(), capsule.getCoverageTarget()+"");
+				alignmentDetails.put(BlastParameters.bitScore.toString(), container.getBitScore()+"");
+				alignmentDetails.put(BlastParameters.e_value.toString(), container.getEvalue()+"");
+				alignmentDetails.put(BlastParameters.align_len.toString(), container.getAlignmentLength()+"");
+				alignmentDetails.put(BlastParameters.identity.toString(), container.getIdentityScore()+"");
+				alignmentDetails.put(BlastParameters.score.toString(), container.getScore()+"");
+				alignmentDetails.put(BlastParameters.query_coverage.toString(), container.getCoverageQuery()+"");
+				alignmentDetails.put(BlastParameters.target_coverage.toString(), container.getCoverageTarget()+"");
 				
 				similarities.put(target, alignmentDetails);
 				mappingObj.put(query, similarities);

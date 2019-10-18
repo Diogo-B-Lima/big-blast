@@ -6,13 +6,21 @@ public class test {
 
 	public static void main(String[] args) throws Exception {
 		
+		
+		
+		String queryPath = "C:\\Users\\Diogo\\Desktop\\query.faa";
+		String subjectPath = "C:\\Users\\Diogo\\Desktop\\subject.faa";
+		
+		App.runBlast(null, queryPath, subjectPath, "10","0","0","0", 500, "C:\\Users\\Diogo\\Desktop\\bigBlast\\", "C:\\\\Users\\\\Diogo\\\\Desktop\\\\bigBlast\\\\bigBlastResults.json");
+		
+		
 //		App.fixJsonFile2("C:\\Users\\Davide\\Desktop\\n.txt");
 		
 //		App.fixJsonFile("C:\\Users\\Davide\\Desktop\\Sophia\\FINAL_RESULT_SOPHIA4.json");
 		
-		Set<String> refs = ProcessResults.readDataBackupFile("C:\\Users\\Davide\\Desktop\\Sophia\\FINAL_RESULT_SOPHIA5.json");
+		//Set<String> refs = ProcessResults.readDataBackupFile("C:\\Users\\Davide\\Desktop\\Sophia\\FINAL_RESULT_SOPHIA5.json");
 		
-		System.out.println("AA -> " + refs.size());
+		//System.out.println("AA -> " + refs.size());
 		
 //		Set<String> ref = ProcessResults.readDataBackupFile("C:\\Users\\Davide\\Desktop\\allResults\\FINAL_RESULT2.json");
 //		
