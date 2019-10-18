@@ -49,10 +49,10 @@ public class App
 		String query = "";
 		String subject = "";
 		String blastProgram = "";
-		String evalue = "";
-		String bitScore = "";
-		String queryCoverage = "";
-		String subjectCoverage = "";
+		String evalue = EVALUE;
+		String bitScore = BIT_SCORE;
+		String queryCoverage = QUERY_COVERAGE;
+		String subjectCoverage = SUBJECT_COVERAGE;
 
 		String workDirectory = "";
 		String resultsFileName = FINAL_RESULTS;
